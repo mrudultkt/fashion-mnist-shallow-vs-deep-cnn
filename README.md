@@ -1,57 +1,147 @@
-# Fashion-MNIST: Shallow CNN vs Deep CNN
+# Fashion-MNIST CNN Comparative Study: Shallow CNN vs Deep CNN
 
-A comparative study of a shallow CNN and a deep CNN on the Fashion-MNIST dataset — covering data preprocessing, model architecture design, training, evaluation, and error analysis.
+A deep learning project that classifies Fashion-MNIST clothing images using Convolutional Neural Networks (CNNs). It builds a Shallow CNN and a Deep CNN, trains them under identical settings, and compares their accuracy, generalization, training time and error patterns.
 
-## 📌 Overview
+## Project Overview
 
-This project trains two convolutional neural networks of differing depth on the same dataset and training setup, then compares them on accuracy, parameter count, training time, and generalization behavior.
+The objective is to understand how CNN depth affects performance on an image classification task. Both models are trained on the same data with the same optimizer, loss, epochs, batch size and validation split, so the comparison stays fair.
 
-| | Shallow CNN | Deep CNN |
-|---|---|---|
-| Conv layers | 1 | 6 |
-| Pooling layers | 1 | 3 |
-| Regularization | None | Batch Normalization + Dropout |
-| Dense layers | 1 (64 units) | 1 (256 units) |
+The study answers four questions:
 
-## 📂 Dataset
+- Does a deeper CNN perform meaningfully better than a shallow one?
+- Which model generalizes better to unseen images?
+- Which clothing classes are easiest and hardest to classify?
+- Does extra depth reduce confusion between visually similar classes?
 
-[Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) — 70,000 grayscale 28×28 images across 10 clothing categories (T-shirt/top, Trouser, Pullover, Dress, Coat, Sandal, Shirt, Sneaker, Bag, Ankle boot). Loaded directly via `tensorflow.keras.datasets.fashion_mnist`.
+## Dataset
 
-## 🗂 Repository Structure
-├── Fashion_MNIST_Shallow_vs_Deep_CNN.ipynb # Main notebook — all experiments
-├── Comparative_Report_Fashion_MNIST.md # Short written report
-└── README.md
+**Fashion-MNIST** contains 70,000 grayscale images (28 × 28 pixels) across 10 clothing and footwear classes.
 
-## 🧪 What's in the Notebook
+| Split | Images |
+|---|---|
+| Training | 60,000 |
+| Test | 10,000 |
 
-1. **Data loading & exploration** — shapes, class distribution, sample images, normalization, reshaping
-2. **Shallow CNN** — build, train, evaluate, plot accuracy/loss curves
-3. **Deep CNN** — build, train, evaluate, plot accuracy/loss curves
-4. **Comparison table** — parameters, accuracy, training time, overfitting check
-5. **Error analysis** — correct/incorrect predictions, confusion matrices
-6. **Final conclusion** — recommendation and key takeaways
+**Classes:** T-shirt/top, Trouser, Pullover, Dress, Coat, Sandal, Shirt, Sneaker, Bag, Ankle boot
 
-## ▶️ How to Run
+The dataset is loaded directly through `tensorflow.keras.datasets`, so no manual download is needed.
 
-1. Open the notebook in [Google Colab](https://colab.research.google.com/) (recommended — enable GPU via `Runtime → Change runtime type → GPU`) or run locally with Jupyter.
-2. Install dependencies if running locally:
-```bash
-   pip install tensorflow numpy matplotlib seaborn scikit-learn pandas
-```
-3. Run all cells top to bottom.
-
-## 🛠 Tech Stack
+## Technologies Used
 
 - Python
+- Jupyter Notebook
 - TensorFlow / Keras
-- NumPy, Pandas
-- Matplotlib, Seaborn
-- scikit-learn (confusion matrix)
+- NumPy
+- Matplotlib
+- Seaborn
+- Scikit-learn
 
-## 📊 Results
+## Workflow
 
-See the comparison table and confusion matrices in the notebook, and the summary in `Comparative_Report_Fashion_MNIST.md`.
+1. Load and explore the dataset, with one sample image per class
+2. Normalize pixel values from 0–255 to 0–1
+3. Reshape images to `(28, 28, 1)` for `Conv2D` input
+4. Build, train and evaluate a Shallow CNN
+5. Build, train and evaluate a Deep CNN
+6. Compare both models on accuracy, parameters, overfitting and training time
+7. Analyze predictions and confusion matrices
+8. Write the final conclusion
 
-## 📄 License
+## Model Architectures
 
-This project was completed as part of a coursework assignment.
+**Shallow CNN**
+
+```
+Conv2D(32, 3x3, relu) -> Conv2D(64, 3x3, relu) -> MaxPooling2D(2x2)
+-> Flatten -> Dense(128, relu) -> Dense(10, softmax)
+```
+
+**Deep CNN**
+
+```
+Conv2D(32) -> Conv2D(64) -> MaxPooling2D
+-> Conv2D(128) -> MaxPooling2D
+-> Conv2D(256) -> MaxPooling2D
+-> Flatten -> Dense(128, relu) -> Dense(10, softmax)
+```
+
+All convolutional layers use 3 × 3 filters, `padding="same"` and ReLU activation.
+
+## Training Setup
+
+| Setting | Value |
+|---|---|
+| Optimizer | Adam |
+| Loss | `sparse_categorical_crossentropy` |
+| Metric | Accuracy |
+| Epochs | 10 |
+| Batch size | 64 |
+| Validation split | 20% of the training data |
+
+## Results
+
+| Metric | Shallow CNN | Deep CNN |
+|---|---:|---:|
+| Convolutional layers | 2 | 4 |
+| Total parameters | 1,625,866 | 684,170 |
+| Training accuracy | 99.24% | 98.08% |
+| Validation accuracy (final epoch) | 92.38% | 92.26% |
+| **Test accuracy** | **92.35%** | 91.77% |
+| Test loss | 0.3921 | 0.3254 |
+| Correct test predictions | 9,235 | 9,177 |
+| Overfitting observed | Yes | Yes |
+| Approx. training time | ~5 min | ~10 min |
+
+## Key Findings
+
+- The Shallow CNN performed better overall, with 92.35% test accuracy against 91.77% for the Deep CNN.
+- The Deep CNN took about twice as long to train and did not improve test performance, so the extra depth was not justified here.
+- The Deep CNN has fewer parameters despite having more layers, because its three pooling layers shrink the feature maps to 3 × 3 before the Flatten and Dense layers.
+- Both models showed overfitting. Training loss kept falling while validation loss rose in later epochs.
+- The easiest classes were Sandal, Bag, Trouser and Sneaker, which have distinctive shapes.
+- The most confused classes were T-shirt/top and Shirt. The Deep CNN did not reduce this confusion: combined T-shirt/top and Shirt errors rose from 168 (Shallow) to 194 (Deep).
+
+## Final Conclusion
+
+The Shallow CNN is the recommended model for this experiment. It achieved slightly higher test accuracy while needing about half the training time. Increasing CNN depth does not always improve performance, so model architecture, computational cost and generalization should all be considered together.
+
+## Repository Structure
+
+```
+├── ipynb file
+└── README.md
+```
+
+## How to Run
+
+1. **Clone the repository**
+```bash
+   git clone https://github.com/mrudultkt/fashion-mnist-shallow-vs-deep-cnn
+   cd fashion-mnist-shallow-vs-deep-cnn
+```
+
+2. **Install the required dependencies**
+```bash
+   pip install tensorflow numpy matplotlib seaborn scikit-learn jupyter
+```
+
+3. **Launch Jupyter Notebook**
+```bash
+   jupyter notebook
+```
+
+4. **Open the notebook**
+
+   Open the ipynb file from the Jupyter interface.
+
+5. **Run all cells**
+
+   Use **Cell → Run All**, or run the cells from top to bottom.
+
+**Notes:**
+- An internet connection is needed the first time you run it, because Keras downloads Fashion-MNIST automatically.
+- On a CPU, training takes roughly 5 minutes for the Shallow CNN and 10 minutes for the Deep CNN. Times vary by machine.
+
+## Notes
+
+Both models use identical preprocessing, training settings and validation split, so differences in performance come from the architecture alone. Test accuracy is the primary metric for comparing generalization.
